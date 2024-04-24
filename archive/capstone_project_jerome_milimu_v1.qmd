@@ -1,0 +1,167 @@
+---
+title: "Fertility among women aged between 15 and 49 years in South Africa "
+author: "Jerome Wendoh Milimu"
+date: 2024-03-19
+format: 
+  html:
+    toc: true
+    toc_float: true
+    code-fold: true
+editor_options: 
+  chunk_output_type: console
+execute:
+  echo: false
+---
+
+# Introduction
+
+## South Africa
+
+![](images/1200px-Map_of_South_Africa.svg.png){width="624"}
+
+South Africa is a country on the southernmost tip of Africa. Has an expansive coastline that spans 2,798 kilometres, stretching along the South Atlantic and Indian Oceans. The country is bordered to the north by Namibia, Botswana, and Zimbabwe; and to the east and northeast by Mozambique and Eswatini. Pretoria is the administrative capital, while Cape Town, as the seat of Parliament, is the legislative capital. Bloemfontein has traditionally been regarded as the judicial capital. The largest city, and site of highest court is Johannesburg.
+
+Black South Africans make up around 80% of the population. The greatest populations of European (White South Africans), Asian (Chinese and Indian South Africans), and multiracial (Coloured South Africans) ancestry make up the residual population of Africa. The diverse cultures, languages, and religions that make up South Africa's multiethnic society are numerous.
+
+## South Africa Demographic and Health Survey (DHS)
+
+The South Africa Demographic and Health Survey (DHS) 2016 is part of Phase 7 of the DHS series: a comprehensive, nationally representative household survey series. For the 2016 South Africa DHS, 8,514 women ages 15-49 were successfully interviewed from 11,083 households.
+
+The number of children that a woman bears depends on many factors, including the age at which she begins childbearing, the intervals between her births, and her fecundity. Postponing first births and extending the interval between births have played a role in reducing fertility levels in many Southern African countries, including South Africa. These factors also have positive health consequences. In contrast, short birth intervals (of less than 24 months) can lead to harmful outcomes for both newborns and their mothers, such as preterm birth, low birth weight, and maternal or child death. Childbearing at a very young age is associated with an increased risk of complications during pregnancy and childbirth and higher rates of neonatal mortality. This chapter describes the current level of fertility in South Africa and some of its proximate determinants. It presents information on the total fertility rate, birth intervals, insusceptibility to pregnancy (due to postpartum amenorrhoea, postpartum abstinence, or menopause), age at first birth, and teenage childbearing.
+
+The objective of the capstone project is to evaluate perceptions and behaviour around fertility among women aged between 15 and 49 years in South Africa. The data source for this analysis is the *2016 South Africa Demographic and Health Surveys(DHS)*. More info about the survey can be found [here](https://dhsprogram.com/data/Guide-to-DHS-Statistics/).
+
+The data elements selected for this analysis include;
+
+-   *Respondent's age*
+
+-   *Respondent at 1st sex*
+
+-   *Respondent at 1st birth*
+
+-   *Whether currently pregnant or not*
+
+-   *Region and type of residence*
+
+-   *Native language of respondent*
+
+-   *Highest educational level*
+
+-   *Ethnicity*
+
+-   *Wealth index*
+
+-   *Number children ever born*
+
+-   *Ideal number of children*
+
+-    *Current marital status*
+
+## Background characteristics
+
+```{r}
+# Load packages
+  #if(!require(pacman)) install.packages("pacman")
+pacman::p_load(
+  janitor, # data analysis utilities
+  here, # force rmds to use the project folder as working directory
+  haven, # for reading in stata files
+  tidyverse, # for everything
+  gt # Create beautiful tables  
+  )
+```
+
+```{r}
+# Reading in the .dta file
+ir_sa_raw <- 
+  haven::read_dta(here("data/South Africa_IR71DT/ZAIR71FL.DTA"),
+                  
+                 # Provide a vector of column names
+                  col_select = c(
+                     v007, # Year of interview
+                     v012, # Respondent's current age
+                     v013, # Age in 5-year groups
+                     v024, # Region
+                     v025, # Type of place of residence
+                     v045c, # Native language of respondent  
+                     v106, # Highest educational level
+                     v131, # Ethnicity
+                     v190, # Wealth index combined  
+                     v201, # Total children ever born
+                     v212, # Age of respondent at 1st birth
+                     v213, #Currently pregnant
+                     v218, # Number of living children
+                     v225, # Current pregnancy wanted
+                     v501, # Current marital status
+                     v525, # Age at first sex
+                     v613, # Ideal number of children
+                  ))
+                  
+                  
+```
+
+```{r}
+# Look at a preview of the raw data frame
+  # head(ir_sa_raw)
+```
+
+```{r}
+# Renaming the variables
+ir_sa_renamed <- 
+  ir_sa_raw %>% 
+  rename(yr_interview = v007,
+         age = v012,
+         age_groups = v013,
+         region = v024,
+         urban_rural = v025,
+         native_language = v045c,  
+         highest_educ = v106,
+         ethnicity = v131,
+         wealth_index = v190,  
+         num_children_born = v201,
+         age_first_birth = v212,
+         pregnant_currently = v213,
+         num_children_alive = v218,
+         pregnant_currently_wanted = v225,
+         marital_status = v501,
+         age_first_sex = v525,
+         num_children_ideal = v613)
+```
+
+```{r}
+# Look at a preview of the renamed data frame
+  # head(ir_sa_renamed)
+```
+
+```{r}
+# Note the data class of each variable 
+  # glimpse(ir_sa_renamed)
+```
+
+```{r}
+# Convert from labelled data to regular factors 
+ir_sa_clean <-    
+  ir_sa_renamed %>%    
+  haven::as_factor() 
+```
+
+```{r}
+# Review data classes of the newly converted variables 
+  #glimpse(ir_sa_clean)
+```
+
+### Bar chart shoing current pregnancy status by education level
+
+```{r}
+ir_sa_clean %>%   
+  mutate(highest_educ = factor(highest_educ, levels = c("no education",                                                                    "primary",                                                                         "secondary",                                                                       "higher"))) %>%   
+  group_by(pregnant_currently, highest_educ, .drop = FALSE) %>%   
+  summarise(number_of_individuals = n(), .groups = 'drop') %>%   
+  ggplot() +   
+  geom_col(aes(x = pregnant_currently,
+               y = number_of_individuals,
+               fill = highest_educ),
+           position = "dodge")
+```
+
+### 
