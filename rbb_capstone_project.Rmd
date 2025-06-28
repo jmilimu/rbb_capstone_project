@@ -3,6 +3,8 @@ title: "Fertility Among Women aged Between 15 and 49 Years in South Africa "
 author: "Jerome Wendoh Milimu"
 date: "`r format(Sys.Date(),'%Y%m%d')`"
 output: github_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 # Introduction
@@ -54,6 +56,10 @@ Data analysis for this project was carried out in the R version 4.3.2. R is a st
 ```{r load_packages, include=FALSE}
 # Load packages
   #if(!require(pacman)) install.packages("pacman")
+
+# install.packages("devtools")
+devtools::install_github("davidsjoberg/ggsankey")
+
 pacman::p_load(
   janitor, # data analysis utilities
   here, # force rmds to use the project folder as working directory
